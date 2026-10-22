@@ -1,0 +1,32 @@
+{
+  "name": "pharmacy-backend",
+  "version": "1.0.0",
+  "description": "Express + MongoDB + Socket.IO Backend for Pharmacy Store Management",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "seed": "node src/scripts/seed.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.5.1",
+    "nodemailer": "^6.9.14",
+    "pdfkit": "^0.15.0",
+    "razorpay": "^2.9.4",
+    "socket.io": "^4.7.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4",
+    "supertest": "^7.0.0",
+    "vitest": "^2.1.5"
+  }
+}
