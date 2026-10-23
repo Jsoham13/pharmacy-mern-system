@@ -1,3 +1,4 @@
+import dns from 'node:dns';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
@@ -12,6 +13,12 @@ import StockMovement from '../models/StockMovement.js';
 import StoreSettings from '../models/StoreSettings.js';
 
 dotenv.config();
+
+try {
+  dns.setServers(['8.8.8.8', '8.8.4.4']);
+} catch {
+  // safe fallback
+}
 
 const seed = async () => {
   try {
