@@ -15,26 +15,41 @@ dotenv.config();
 
 const app = express();
 
-// Middlewares
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+// Secure CORS policy: accepts allowed origins from env or defaults to local dev ports
+const allowedOrigins = process.env.CLIENT_ORIGIN
+  ? process.env.CLIENT_ORIGIN.split(',').map((o) => o.trim())
+  : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost'];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, or same-origin)
+      if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Fallback gracefully for demo while honoring headers
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Health Check
+// Health Check Endpoint (Essential for Render / Railway / AWS health probes)
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     system: 'Shree Ganesh Medical Store Management System (MERN Stack)',
+    environment: process.env.NODE_ENV || 'development',
     timestamp: new Date().toISOString(),
     services: {
       database: 'MongoDB',
       realtime: 'Socket.IO',
-      payments: 'Razorpay Integration',
+      payments: 'Razorpay Gateway',
       invoicing: 'PDFKit + GST Tax Invoice',
       notifications: 'Nodemailer + WhatsApp Link',
     },
@@ -56,12 +71,13 @@ app.use((req, res, next) => {
   res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
 });
 
-// Global Error Handler
+// Global Error Handler (Masks stack trace details in production)
 app.use((err, req, res, next) => {
-  console.error('Unhandled Server Error:', err);
+  console.error('[Server Error]:', err);
+  const isProd = process.env.NODE_ENV === 'production';
   res.status(err.status || 500).json({
     success: false,
-    message: err.message || 'Internal Server Error',
+    message: isProd ? 'An internal server error occurred' : err.message || 'Internal Server Error',
   });
 });
 

@@ -1,6 +1,31 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
+// In-memory rate limiter for login protection against brute-force attacks
+const loginAttempts = new Map();
+
+export const loginRateLimiter = (maxAttempts = 10, windowMs = 15 * 60 * 1000) => (req, res, next) => {
+  const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown_ip';
+  const now = Date.now();
+  const record = loginAttempts.get(ip);
+
+  if (!record || now > record.resetTime) {
+    loginAttempts.set(ip, { count: 1, resetTime: now + windowMs });
+    return next();
+  }
+
+  if (record.count >= maxAttempts) {
+    const minutesLeft = Math.ceil((record.resetTime - now) / 60000);
+    return res.status(429).json({
+      success: false,
+      message: `Too many login attempts. Please try again after ${minutesLeft} minute(s).`,
+    });
+  }
+
+  record.count += 1;
+  next();
+};
+
 export const authenticate = async (req, res, next) => {
   try {
     let token = null;
@@ -14,7 +39,8 @@ export const authenticate = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Authentication required. No token provided.' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev_secret_key_12345');
+    const secret = process.env.JWT_SECRET || 'dev_secret_key_12345';
+    const decoded = jwt.verify(token, secret);
     const user = await User.findById(decoded.id).select('-password');
 
     if (!user || !user.isActive) {

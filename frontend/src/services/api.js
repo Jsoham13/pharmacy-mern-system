@@ -1,7 +1,15 @@
 import axios from 'axios';
 
+const getBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl) {
+    return envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`;
+  }
+  return '/api';
+};
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: getBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
@@ -76,7 +84,10 @@ export const saleService = {
   emailInvoice: (id, data) => api.post(`/sales/${id}/email-invoice`, data),
   updateDeliveryStatus: (id, data) => api.patch(`/sales/${id}/delivery-status`, data),
   createReturn: (data) => api.post('/sales/return', data),
-  getInvoiceDownloadUrl: (id) => `/api/sales/${id}/invoice`,
+  getInvoiceDownloadUrl: (id) => {
+    const envUrl = import.meta.env.VITE_API_URL || '';
+    return `${envUrl}/api/sales/${id}/invoice`;
+  },
 };
 
 export const reportService = {

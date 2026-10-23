@@ -7,14 +7,14 @@ const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   try {
-    // 1. Connect MongoDB
+    // 1. Connect MongoDB (supports local or MongoDB Atlas)
     await connectDB();
 
     // 2. Create HTTP Server
     const server = http.createServer(app);
 
-    // 3. Attach Socket.IO
-    initSocket(server);
+    // 3. Attach Socket.IO with origin configuration
+    initSocket(server, process.env.CLIENT_ORIGIN || '*');
 
     // 4. Start listening
     server.listen(PORT, () => {

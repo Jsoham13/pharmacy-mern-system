@@ -12,6 +12,8 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     // In dev (port 5173), connect directly to backend :5000 to avoid Vite proxy socket disconnect noise
     const socketUrl =
+      import.meta.env.VITE_SOCKET_URL ||
+      import.meta.env.VITE_API_URL ||
       import.meta.env.VITE_BACKEND_URL ||
       (typeof window !== 'undefined' && window.location.port === '5173'
         ? `http://${window.location.hostname}:5000`
