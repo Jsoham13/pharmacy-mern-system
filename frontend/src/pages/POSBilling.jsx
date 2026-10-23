@@ -20,6 +20,7 @@ import {
   Phone,
   Radio,
   Pill,
+  Truck,
 } from 'lucide-react';
 import { medicineService, batchService, saleService } from '../services/api';
 
