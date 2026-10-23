@@ -10,10 +10,17 @@ export const SocketProvider = ({ children }) => {
   const [activeDeliveryUpdate, setActiveDeliveryUpdate] = useState(null);
 
   useEffect(() => {
-    // Connect to same origin in browser (proxied by Vite to :5000 in dev)
-    const socketInstance = io('/', {
+    // In dev (port 5173), connect directly to backend :5000 to avoid Vite proxy socket disconnect noise
+    const socketUrl =
+      import.meta.env.VITE_BACKEND_URL ||
+      (typeof window !== 'undefined' && window.location.port === '5173'
+        ? `http://${window.location.hostname}:5000`
+        : '/');
+
+    const socketInstance = io(socketUrl, {
       transports: ['websocket', 'polling'],
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
     });
 
     socketInstance.on('connect', () => {
