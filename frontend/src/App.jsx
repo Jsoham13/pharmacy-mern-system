@@ -14,6 +14,7 @@ import Inventory from './pages/Inventory';
 import Purchases from './pages/Purchases';
 import Sales from './pages/Sales';
 import LiveDelivery from './pages/LiveDelivery';
+import RiderPortal from './pages/RiderPortal';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 
@@ -32,6 +33,11 @@ const ProtectedLayout = () => {
     return <Navigate to="/login" replace />;
   }
 
+  // Delivery partner isolated mobile dashboard view
+  if (user.role === 'DELIVERY_PARTNER') {
+    return <RiderPortal />;
+  }
+
   return (
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
@@ -46,6 +52,7 @@ const ProtectedLayout = () => {
             <Route path="/purchases" element={<Purchases />} />
             <Route path="/sales" element={<Sales />} />
             <Route path="/delivery" element={<LiveDelivery />} />
+            <Route path="/rider-preview" element={<RiderPortal />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<Navigate to="/" replace />} />

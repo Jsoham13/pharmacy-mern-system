@@ -24,7 +24,8 @@ export default function Sidebar() {
     { to: '/inventory', label: 'Batch Inventory', icon: Boxes },
     { to: '/purchases', label: 'Purchases (Inward)', icon: Truck, roles: ['OWNER_ADMIN', 'PHARMACIST'] },
     { to: '/sales', label: 'Sales History', icon: Receipt },
-    { to: '/delivery', label: 'Live Delivery', icon: MapPin },
+    { to: '/delivery', label: 'Live Delivery Radar', icon: MapPin },
+    { to: '/rider-preview', label: 'Rider App (Mobile UI)', icon: Truck },
     { to: '/reports', label: 'Analytics & GST', icon: BarChart3, roles: ['OWNER_ADMIN', 'PHARMACIST'] },
     { to: '/settings', label: 'Store Settings', icon: Settings, roles: ['OWNER_ADMIN'] },
   ];
