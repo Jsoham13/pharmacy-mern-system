@@ -53,6 +53,16 @@ const LOCAL_DOCTORS = [
   { name: 'Dr. Sunita Deshmukh, DNB (Pedia)', regNo: 'MMC / Reg. 2015/02/7890' },
 ];
 
+// Quick Locality Chips for Sangli / Miraj Deliveries
+const SANGLI_LOCALITIES = [
+  'Vishrambag',
+  'Shivaji Nagar',
+  'Market Yard',
+  'Miraj Mission',
+  'Ganpati Peth',
+  'Gaon Bhag',
+];
+
 export default function POSBilling() {
   const [allMedicines, setAllMedicines] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
@@ -656,6 +666,89 @@ export default function POSBilling() {
               </div>
             </div>
 
+            {/* Fulfillment Mode Toggle: Counter Takeaway vs Home Delivery */}
+            <div className="p-3.5 bg-slate-50/90 border-t border-slate-200 space-y-2">
+              <span className="text-[10px] font-extrabold uppercase text-slate-600 tracking-wider block">
+                Fulfillment Mode:
+              </span>
+              <div className="grid grid-cols-2 gap-2 text-xs font-black">
+                <button
+                  type="button"
+                  onClick={() => setOrderType('IN_STORE')}
+                  className={`py-2 px-3 rounded-xl border flex items-center justify-center space-x-1.5 transition-all ${
+                    orderType === 'IN_STORE'
+                      ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                      : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  <span>🏪 Counter Takeaway</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setOrderType('DELIVERY')}
+                  className={`py-2 px-3 rounded-xl border flex items-center justify-center space-x-1.5 transition-all ${
+                    orderType === 'DELIVERY'
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/30 ring-2 ring-blue-500/30'
+                      : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  <span>🛵 Home Delivery</span>
+                </button>
+              </div>
+
+              {/* Delivery Address & Fast Locality Chips (Visible when Home Delivery is selected) */}
+              {orderType === 'DELIVERY' && (
+                <div className="pt-2 space-y-2 text-xs animate-in fade-in duration-200">
+                  <div>
+                    <label className="block text-[10px] font-bold text-blue-900 uppercase">
+                      Patient Delivery Address (Sangli / Miraj) *
+                    </label>
+                    <textarea
+                      rows="2"
+                      required
+                      value={deliveryAddress}
+                      onChange={(e) => setDeliveryAddress(e.target.value)}
+                      placeholder="e.g. Flat 302, Sai Residency, Near Shivaji Chowk, Sangli"
+                      className="w-full p-2 bg-white border border-blue-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  {/* Quick Locality Chips for Sangli */}
+                  <div className="flex flex-wrap gap-1 items-center">
+                    <span className="text-[10px] text-slate-400 font-semibold mr-1">Quick Area:</span>
+                    {SANGLI_LOCALITIES.map((loc) => (
+                      <button
+                        key={loc}
+                        type="button"
+                        onClick={() =>
+                          setDeliveryAddress((prev) => (prev ? `${prev}, ${loc}` : loc))
+                        }
+                        className="px-2 py-0.5 rounded-md bg-white border border-slate-300 hover:border-blue-500 font-medium text-slate-600 text-[10px]"
+                      >
+                        + {loc}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Rider Cash Collection Notice */}
+                  <div
+                    className={`p-2 rounded-lg text-[11px] font-bold flex items-center space-x-1.5 ${
+                      paymentMethod === 'CASH'
+                        ? 'bg-amber-100/80 text-amber-900 border border-amber-300'
+                        : 'bg-emerald-100/80 text-emerald-900 border border-emerald-300'
+                    }`}
+                  >
+                    <span>
+                      {paymentMethod === 'CASH'
+                        ? '🟠 Rider will collect ₹' + grandTotal + ' Cash on Delivery'
+                        : '🟢 Order is Prepaid Online — Rider will only hand over medicines'}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Payment Method Selector (Big Tactile Buttons) */}
             <div className="p-4 bg-slate-100/60 border-t border-slate-200 space-y-3">
               <span className="text-[11px] font-extrabold uppercase text-slate-600 tracking-wider block">
@@ -742,10 +835,23 @@ export default function POSBilling() {
                 type="button"
                 onClick={handleCheckout}
                 disabled={loading || cart.length === 0}
-                className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white font-black text-base rounded-2xl shadow-xl shadow-emerald-600/30 transition-all flex items-center justify-center space-x-2 tracking-wide uppercase"
+                className={`w-full py-4 text-white font-black text-base rounded-2xl shadow-xl transition-all flex items-center justify-center space-x-2 tracking-wide uppercase ${
+                  orderType === 'DELIVERY'
+                    ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/30'
+                    : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30'
+                }`}
               >
-                <CheckCircle className="w-5 h-5" />
-                <span>{loading ? 'Processing Bill...' : `COLLECT ₹${grandTotal} & PRINT`}</span>
+                {orderType === 'DELIVERY' ? (
+                  <>
+                    <Truck className="w-5 h-5 animate-pulse" />
+                    <span>{loading ? 'Dispatching...' : `DISPATCH TO RIDER (₹${grandTotal})`}</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-5 h-5" />
+                    <span>{loading ? 'Processing Bill...' : `COLLECT ₹${grandTotal} & PRINT`}</span>
+                  </>
+                )}
               </button>
             </div>
           </div>

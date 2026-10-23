@@ -55,7 +55,22 @@ export default function RiderPortal() {
     fetchStoreInfo();
   }, []);
 
-  // Real-time socket updates
+  // Real-time socket updates for incoming delivery orders & live status
+  useEffect(() => {
+    if (!socket) return;
+    const handleOrderCreated = (order) => {
+      if (order && order.orderType === 'DELIVERY') {
+        fetchOrders();
+      }
+    };
+    socket.on('order:created', handleOrderCreated);
+    socket.on('order:updated', fetchOrders);
+    return () => {
+      socket.off('order:created', handleOrderCreated);
+      socket.off('order:updated', fetchOrders);
+    };
+  }, [socket]);
+
   useEffect(() => {
     if (activeDeliveryUpdate) {
       fetchOrders();
